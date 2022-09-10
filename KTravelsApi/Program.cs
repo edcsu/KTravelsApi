@@ -5,6 +5,11 @@ using KTravelsApi.Core.Config;
 using KTravelsApi.Core.DependencyInjection;
 using KTravelsApi.Core.Extensions;
 using KTravelsApi.Data;
+using KTravelsApi.Features.HotelReviews.Repositories;
+using KTravelsApi.Features.HotelReviews.Services;
+using KTravelsApi.Features.Hotels.Repositories;
+using KTravelsApi.Features.RestaurantReviews.Repositories;
+using KTravelsApi.Features.Restaurants.Repositories;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -67,6 +72,13 @@ try
             };
         });
     
+    builder.Services.AddTransient<IHotelReviewRepository, HotelReviewRepository>();
+    builder.Services.AddTransient<IHotelRepository, HotelRepository>();
+    builder.Services.AddTransient<IRestaurantRepository, RestaurantRepository>();
+    builder.Services.AddTransient<IRestaurantReviewRepository, RestaurantReviewRepository>();
+    
+    builder.Services.AddTransient<IHotelReviewService, HotelReviewService>();
+
     var app = builder.Build();
 
     app.UseCustomSecurityHeaders();
