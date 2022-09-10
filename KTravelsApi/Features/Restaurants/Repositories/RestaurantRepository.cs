@@ -1,55 +1,55 @@
 ﻿using KTravelsApi.Data;
-using KTravelsApi.Features.Hotels.Models;
+using KTravelsApi.Features.Restaurants.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace KTravelsApi.Features.Hotels.Repositories;
+namespace KTravelsApi.Features.Restaurants.Repositories;
 
-public class HotelRepository : IHotelRepository
+public class RestaurantRepository : IRestaurantRepository
 {
     private readonly ApplicationDbContext _context;
 
-    public HotelRepository(ApplicationDbContext context)
+    public RestaurantRepository(ApplicationDbContext context)
     {
         _context = context;
     }
 
-    public async Task<Hotel> AddAsync(Hotel hotel, 
+    public async Task<Restaurant> AddAsync(Restaurant restaurant, 
         CancellationToken cancellationToken = default)
     {
-        await _context.Hotels.AddAsync(hotel, cancellationToken);
+        await _context.Restaurants.AddAsync(restaurant, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
-        return hotel;
+        return restaurant;
     }
 
     public async Task<bool> ExistsAsync<TE>(Guid id, 
         CancellationToken cancellationToken = default)
     {
-        return await _context.Hotels
+        return await _context.Restaurants
             .AsNoTracking()
             .AnyAsync(it => it.Id == id && it.IsDeleted == false, cancellationToken);
     }
 
     public async Task<int> GetCountAsync(CancellationToken cancellationToken = default)
     {
-        return await _context.Hotels
+        return await _context.Restaurants
             .AsNoTracking()
             .CountAsync(cancellationToken);
     }
 
-    public async Task<Hotel?> FindAsync(Guid id, 
+    public async Task<Restaurant?> FindAsync(Guid id, 
         CancellationToken cancellationToken = default)
     {
-        return await _context.Hotels
+        return await _context.Restaurants
             .AsNoTracking()
             .Include(it => it.Reviews)
             .FirstOrDefaultAsync(r => r.Id == id && r.IsDeleted == false, cancellationToken);
     }
 
-    public async Task<Hotel> UpdateAsync(Hotel hotel, 
+    public async Task<Restaurant> UpdateAsync(Restaurant restaurant, 
         CancellationToken cancellationToken = default)
     {
-        _context.Hotels.Update(hotel);
+        _context.Restaurants.Update(restaurant);
         await _context.SaveChangesAsync(cancellationToken);
-        return hotel;
+        return restaurant;
     }
 }
