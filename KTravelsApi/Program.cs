@@ -1,25 +1,129 @@
-var builder = WebApplication.CreateBuilder(args);
+using System.Text.Json.Serialization;
+using FluentValidation.AspNetCore;
+using HealthChecks.UI.Client;
+using KTravelsApi.Core.Config;
+using KTravelsApi.Core.DependencyInjection;
+using KTravelsApi.Core.Extensions;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.IdentityModel.Tokens;
+using Serilog;
 
-// Add services to the container.
+var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? string.Empty;
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .WriteTo.Debug()
+    .CreateBootstrapLogger();
 
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+Log.Information("Starting up Env:{Environment}", environment);
 
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+try
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    var builder = WebApplication.CreateBuilder(args);
+    var configuration = builder.Configuration;
+
+    // Add services to the container.
+
+    builder.AddSerilogConfig();
+
+    builder.Services.AddCustomHealthChecks(configuration);
+
+    // enable cache
+    builder.Services.AddMemoryCache();
+
+    builder.Services.AddControllers()
+        .AddJsonOptions(options =>
+        {
+            options.JsonSerializerOptions.WriteIndented = true;
+
+            // serialize enums as strings in api responses (e.g. Role)
+            options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        });
+
+    builder.Services.AddFluentValidationAutoValidation(options =>
+    {
+        options.DisableDataAnnotationsValidation = true;
+    });
+
+    builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+    builder.Services.CustomAddSwaggerGen(configuration);
+    builder.AddApiVersioningConfig();
+
+    var auth = configuration.GetAuthServiceSettings();
+    builder.Services.AddAuthentication("Bearer")
+        .AddJwtBearer("Bearer", options =>
+        {
+            options.Authority = auth.Authority;
+            options.Audience = auth.ApiName;
+            options.RequireHttpsMetadata = true;
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateAudience = false
+            };
+        });
+    
+    var app = builder.Build();
+
+    app.UseCustomSecurityHeaders();
+
+    if (app.Environment.IsDevelopment())
+    {
+    }
+
+    app.UseCustomErrorHandling();
+
+    app.UseSerilogRequestLogging();
+
+    app.CustomUseSwagger(configuration);
+
+    app.UseHttpsRedirection();
+
+    app.UseRouting();
+
+    //app.UseAuthentication();
+    app.UseAuthorization();
+
+    app.MapControllers();
+
+    app.UseFileServer();
+
+    app.UseEndpoints(endpoints =>
+    {
+        endpoints.MapControllers();
+
+        endpoints.MapHealthChecks("/health",
+            new HealthCheckOptions
+            {
+                Predicate = _ => true,
+                ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+            }
+        );
+
+        if (configuration.ShowHealthCheckUi())
+        {
+            //map healthcheck ui endpoint - default is /healthchecks-ui/
+            endpoints.MapHealthChecksUI(setup =>
+            {
+                setup.AddCustomStylesheet("wwwroot/css/health.css");
+            });
+        }
+    });
+
+
+    app.Run();
 }
+catch (Exception ex)
+{
+    var type = ex.GetType().Name;
+    if (type.Equals("StopTheHostException", StringComparison.Ordinal))
+    {
+        throw;
+    }
 
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();
+    Log.Fatal(ex, "Unhandled exception");
+}
+finally
+{
+    Log.Information("Shut down complete");
+    Log.CloseAndFlush();
+}
