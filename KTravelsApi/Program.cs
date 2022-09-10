@@ -4,7 +4,9 @@ using HealthChecks.UI.Client;
 using KTravelsApi.Core.Config;
 using KTravelsApi.Core.DependencyInjection;
 using KTravelsApi.Core.Extensions;
+using KTravelsApi.Data;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 
@@ -25,6 +27,9 @@ try
 
     builder.AddSerilogConfig();
 
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
+    
     builder.Services.AddCustomHealthChecks(configuration);
 
     // enable cache
@@ -87,6 +92,8 @@ try
 
     app.UseFileServer();
 
+    Initializer.PopulateDb(app);
+    
     app.UseEndpoints(endpoints =>
     {
         endpoints.MapControllers();
