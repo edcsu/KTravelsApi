@@ -2,19 +2,21 @@
 using KTravelsApi.Core.Controllers;
 using KTravelsApi.Features.HotelReviews.Services;
 using KTravelsApi.Features.HotelReviews.ViewModels;
+using KTravelsApi.Features.RestaurantReviews.Services;
+using KTravelsApi.Features.RestaurantReviews.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace KTravelsApi.Features.HotelReviews.Controllers;
 
-[Route("api/hotelReviews")]
-public class HotelReviewsController : BaseController
+[Route("api/restaurantReviews")]
+public class RestaurantReviewsController : BaseController
 {
-    private readonly IHotelReviewService _hotelReviewService;
+    private readonly IRestaurantReviewService _restaurantReviewService; 
 
-    public HotelReviewsController(IHotelReviewService hotelReviewService)
+    public RestaurantReviewsController(IRestaurantReviewService restaurantReviewService)
     {
-        _hotelReviewService = hotelReviewService;
+        _restaurantReviewService = restaurantReviewService;
     }
 
     /// <summary>
@@ -36,95 +38,95 @@ public class HotelReviewsController : BaseController
     // }
 
     /// <summary>
-    /// Get hotel review Details
+    /// Get restaurant review Details
     /// </summary>
-    /// <remarks>Endpoint for getting details of a specific hotel review by unique id.</remarks>
+    /// <remarks>Endpoint for getting details of a specific restaurant review by unique id.</remarks>
     /// <param name="id">id</param>
     /// <example>8754b7cb-d0fc-4499-8a1a-ebfb721cf0fc</example>
     /// <returns></returns>
     [SwaggerResponse(
         StatusCodes.Status200OK,
-        "The details of a given hotel review",
-        typeof(HotelReviewViewModel))]
-    [HttpGet("{id:guid}", Name = "Get hotel review by Id")]
+        "The details of a given restaurant review",
+        typeof(RestaurantReviewViewModel))]
+    [HttpGet("{id:guid}", Name = "Get restaurant review by Id")]
     [Produces(MediaTypeNames.Application.Json)]
     public async Task<IActionResult> GetById([FromRoute] Guid id)
     {
         if (id == Guid.Empty)
-            return BadRequest(new { Message = "Invalid request Id" });
+            return BadRequest(new { Message = "Invalid restaurant review Id" });
 
-        var result = await _hotelReviewService.GetHotelReviewById(id);
+        var result = await _restaurantReviewService.GetRestaurantReviewById(id);
 
         return Ok(result);
     }
 
     /// <summary>
-    /// Make a hotel review
+    /// Make a restaurant review
     /// </summary>
     /// <remarks>
-    /// Accepts request for creating a hotel review.
+    /// Accepts request for creating a reataurant review.
     /// </remarks>
     /// <returns></returns>
-    [HttpPost(template:"{hotelId:guid}", Name = "AddHotelReview")]
+    [HttpPost(template:"{restaurantId:guid}", Name = "AddRestaurantReview")]
     [SwaggerResponse(
         statusCode: StatusCodes.Status200OK,
-        description: "The hotel review has been created.",
+        description: "The restaurant review has been created.",
         typeof(HotelReviewViewModel))]
     [Produces(MediaTypeNames.Application.Json)]
     public async Task<IActionResult> Create([FromRoute] Guid hotelId,
-        [FromBody, SwaggerRequestBody("The hotel review request payload", Required = true)]
-        HotelReviewCreateModel createModel, CancellationToken cancellationToken = default)
+        [FromBody, SwaggerRequestBody("The restaurant review request payload", Required = true)]
+        RestaurantReviewCreateModel createModel, CancellationToken cancellationToken = default)
     {
-        var viewModel = await _hotelReviewService.AddHotelReviewAsync(hotelId, createModel, cancellationToken);
+        var viewModel = await _restaurantReviewService.AddRestaurantReviewAsync(hotelId, createModel, cancellationToken);
 
         return CreatedAtAction("GetById", viewModel.Id, viewModel);
     }
 
     /// <summary>
-    /// Edit a HotelReview
+    /// Edit a restaurant review
     /// </summary>
-    /// <remarks>Endpoint for editing a template by unique id.</remarks>
+    /// <remarks>Endpoint for editing a restaurant review by unique id.</remarks>
     /// <param name="id">id</param>
     /// <param name="updateModel"></param>
     /// <param name="cancellationToken"></param>
     /// <example>8754b7cb-d0fc-4499-8a1a-ebfb721cf0fc</example>
     /// <returns></returns>
     [SwaggerResponse(StatusCodes.Status200OK,
-        description: "The hotel review has been edited.",
-        typeof(HotelReviewViewModel))]
-    [HttpPut("{id:guid}", Name = "Edit a hotel review by Id")]
+        description: "The restaurant review has been edited.",
+        typeof(RestaurantReviewViewModel))]
+    [HttpPut("{id:guid}", Name = "Edit a restaurant review by Id")]
     [Produces(MediaTypeNames.Application.Json)]
     public async Task<IActionResult> EditById([FromRoute] Guid id, 
-        [FromBody] HotelReviewUpdateModel updateModel,
+        [FromBody] RestaurantReviewUpdateModel updateModel,
         CancellationToken cancellationToken = default)
     {
         if (id == Guid.Empty)
             return BadRequest(new { Message = "Invalid request Id" });
 
-        var result = await _hotelReviewService.UpdateHotelReviewAsync(id, updateModel, cancellationToken);
+        var result = await _restaurantReviewService.UpdateRestaurantReviewAsync(id, updateModel, cancellationToken);
 
         return Ok(result);
     }
 
     /// <summary>
-    /// Delete a Hotel review
+    /// Delete a restaurant review
     /// </summary>
-    /// <remarks>Endpoint for deleting a hotel review by unique id.</remarks>
+    /// <remarks>Endpoint for deleting a restaurant review by unique id.</remarks>
     /// <param name="id">id</param>
     /// <param name="cancellationToken"></param>
     /// <example>8754b7cb-d0fc-4499-8a1a-ebfb721cf0fc</example>
     /// <returns></returns>
     [SwaggerResponse(StatusCodes.Status200OK,
-        description: "The hotel review has been deleted.")]
-    [HttpDelete("{id:guid}", Name = "Delete hotel review by Id")]
+        description: "The restaurant review has been deleted.")]
+    [HttpDelete("{id:guid}", Name = "Delete restaurant review by Id")]
     [Produces(MediaTypeNames.Application.Json)]
     public async Task<IActionResult> DeleteById([FromRoute] Guid id,
         CancellationToken cancellationToken = default)
     {
         if (id == Guid.Empty)
-            return BadRequest(new { Message = "Invalid request Id" });
+            return BadRequest(new { Message = "Invalid restaurant review Id" });
 
-        var result = await _hotelReviewService.SoftDeleteHotelReviewAsync(id, cancellationToken);
+        var result = await _restaurantReviewService.SoftDeleteRestaurantReviewAsync(id, cancellationToken);
 
         return Ok(result);
     }
