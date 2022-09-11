@@ -34,7 +34,7 @@ public class RestaurantReviewService : IRestaurantReviewService
         if (restaurantExists is false)
         {
             _logger.LogError("Tried to create a review for a restaurant with the Id: {HotelId}", hotelId);
-            throw new DuplicateEntityException($"Restaurant with id {hotelId} does not exist");
+            throw new ClientFriendlyException($"Restaurant with id {hotelId} does not exist");
         }
 
         await _restaurantReviewRepository.AddAsync(review, cancellationToken);
@@ -83,6 +83,7 @@ public class RestaurantReviewService : IRestaurantReviewService
 
         var updatedReview = _mapper.Map<RestaurantReview>(updateModel);
         updatedReview.Id = id;
+        updatedReview.LastUpdated = DateTime.UtcNow;
 
         var result =await _restaurantReviewRepository.UpdateAsync(updatedReview, cancellationToken);
         return _mapper.Map<RestaurantReviewViewModel>(result);
