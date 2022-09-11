@@ -23,7 +23,7 @@ public class RestaurantService : IRestaurantService
         _mapper = mapper;
     }
 
-    public async Task<RestaurantViewModel> AddRestaurantAsync(Guid hotelId, 
+    public async Task<RestaurantViewModel> AddRestaurantAsync(
         RestaurantCreateModel createModel, CancellationToken cancellationToken = default)
     {
         var restaurant = _mapper.Map<Restaurant>(createModel);

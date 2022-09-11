@@ -4,7 +4,7 @@ namespace KTravelsApi.Features.Restaurants.Services;
 
 public interface IRestaurantService
 {
-    Task<RestaurantViewModel> AddRestaurantAsync(Guid hotelId,
+    Task<RestaurantViewModel> AddRestaurantAsync(
         RestaurantCreateModel createModel, 
         CancellationToken cancellationToken = default);
         
