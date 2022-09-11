@@ -72,6 +72,7 @@ public class HotelService : IHotelService
 
         var updatedHotel = _mapper.Map<Hotel>(updateModel);
         updatedHotel.Id = id;
+        updatedHotel.LastUpdated = DateTime.UtcNow;
 
         var result =await _hotelRepository.UpdateAsync(updatedHotel, cancellationToken);
         return _mapper.Map<HotelViewModel>(result);

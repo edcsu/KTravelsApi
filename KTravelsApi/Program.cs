@@ -12,6 +12,7 @@ using KTravelsApi.Features.Hotels.Services;
 using KTravelsApi.Features.RestaurantReviews.Repositories;
 using KTravelsApi.Features.RestaurantReviews.Services;
 using KTravelsApi.Features.Restaurants.Repositories;
+using KTravelsApi.Features.Restaurants.Services;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -81,6 +82,7 @@ try
     
     builder.Services.AddTransient<IHotelService, HotelService>();
     builder.Services.AddTransient<IHotelReviewService, HotelReviewService>();
+    builder.Services.AddTransient<IRestaurantService, RestaurantService>();
     builder.Services.AddTransient<IRestaurantReviewService, RestaurantReviewService>();
 
     var app = builder.Build();

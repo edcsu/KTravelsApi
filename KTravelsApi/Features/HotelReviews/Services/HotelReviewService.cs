@@ -34,7 +34,7 @@ public class HotelReviewService : IHotelReviewService
         if (hotelExists is false)
         {
             _logger.LogError("Tried to create a review for a hotel with the Id: {HotelId}", hotelId);
-            throw new DuplicateEntityException($"Hotel with id {hotelId} does not exist");
+            throw new ClientFriendlyException($"Hotel with id {hotelId} does not exist");
         }
 
         await _hotelReviewRepository.AddAsync(review, cancellationToken);
@@ -89,6 +89,7 @@ public class HotelReviewService : IHotelReviewService
 
         var updatedTemplate = _mapper.Map<HotelReview>(updateModel);
         updatedTemplate.Id = id;
+        updatedTemplate.LastUpdated = DateTime.UtcNow;
 
         var result =await _hotelReviewRepository.UpdateAsync(updatedTemplate, cancellationToken);
         return _mapper.Map<HotelReviewViewModel>(result);
